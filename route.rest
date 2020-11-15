@@ -1,0 +1,45 @@
+GET http://localhost:3000/staemme
+
+###
+GET http://localhost:3000/staemme/5fae8bd98aac4e40dca9fc0e
+
+###
+POST http://localhost:3000/staemme
+Content-Type: application/json
+
+{
+    "name": "Stamm 3",
+    "email": "stamm1@email.com",
+    "passwort": "123"
+}
+
+###
+DELETE http://localhost:3000/staemme/5fae8bd98aac4e40dca9fc0e
+###
+PATCH  http://localhost:3000/staemme/5faeb6c47debc40b90707a86
+Content-Type: application/json
+
+{
+    "mitglieder": 12
+}
+
+###
+GET http://localhost:3000/posts
+###
+POST http://localhost:3000/news
+Content-Type: application/json
+
+{
+    "titel": "News 1",
+    "min_teilnehmerzahl": 4,
+    "tags": ["Wasser", "Wald"]
+}
+###
+DELETE http://localhost:3000/aktivitaeten/5fb0df68f0084610d433d233
+###
+PATCH  http://localhost:3000/posts/5fb0dfa1f0084610d433d234
+Content-Type: application/json
+
+{
+    "autor": "Tronald Dump"
+}

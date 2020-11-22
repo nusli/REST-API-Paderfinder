@@ -1,16 +1,11 @@
 const { authenticate } = require("passport")
 
 const LocalStrategy = require("passport-local").Strategy
-const Stamm = require('./models/stamm')
 const bcrypt = require('bcrypt')
 
 function initialize(passport, getStammByName, getStammById) {
     async function authenticateUser(stammName, password, done) {
-        try {
-            const stamm = await Stamm.findOne({ name: stammName });
-        } catch (err) {
-            console.log('Konnte Stamm nicht finden', stammName);
-        }
+        const stamm = getStammByName(stammName)
         if (stamm == null) {
             return done(null, false, {message: 'Kein Stamm mit diesem Namen'})
         }

@@ -43,6 +43,12 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
+//Zum Fixen von lokalen CORS-Probleme -> später andere Lösung suchen
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  }); 
+
 // current time in video: 12:58
 
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
@@ -67,5 +73,19 @@ app.post('/login', passport.authenticate('local', {
     failureRedirect: '/login',
     failureFlash: true
 }))
+
+
+
+app.delete('/logout', (req, res) => {
+    req.logOut()
+    // TODO return something
+})
+/*
+function checkAuthenticated(req, res, next) {
+    if(req.isAuthenticated()) {
+        return next()
+    }
+    return res.redirect('login')
+}*/
 
 app.listen(3000, () => console.log('Server has started'))

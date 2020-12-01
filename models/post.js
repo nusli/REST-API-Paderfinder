@@ -14,7 +14,8 @@ const postSchema = new mongoose.Schema({
     stamm_id: String,
     autor: String,
     inhalt: String,
-    tags: [String]
+    tags: [String],
+    image_id: mongoose.Schema.ObjectId
 })
 
 module.exports = mongoose.model("Post", postSchema)

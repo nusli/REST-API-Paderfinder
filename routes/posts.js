@@ -2,6 +2,21 @@ const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
 
+// got the code from here:
+// https://www.youtube.com/watch?v=EVIGIcm7o2w
+const mongoose = require('mongoose')
+var Schema = mongoose.Schema;
+// establish mongodb connection
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
+var conn = mongoose.connection;
+var path = require('path');
+// require GridFS
+const Grid = require('gridfs-stream');
+const fs=require('fs');
+
+// connect GridFS and Mongo
+Grid.mongo = mongoose.mongo
+
 // Getting all
 router.get('/', async (req, res) => {
     try{
@@ -28,6 +43,28 @@ router.post('/', async (req, res) => {
     if (req.body.autor != null) post.autor = req.body.autor
     if (req.body.inhalt != null) post.inhalt = req.body.inhalt
     if (req.body.tags != null) post.tags = req.body.tags
+    if (req.body.image != null) {
+        // TODO: how to check of connection is open?
+        conn.once('open', function () {
+        console.log('- Connection open -');
+        var gfs = Grid(conn.db);
+        // when connection is open, create write stream with
+        // the name to store file as in the DB
+        var writestream = gfs.createWriteStream({
+            // TODO: get file ending
+            filename: req.body.titel + "_image.jpg"
+        });
+        // TODO: does image need to be piped?
+        // create a read_stream for the image and pipe into db
+        fs.createReadStream(req.body.image).pipe(writestream);
+
+        /*
+        writestream.on('close', function(file) {
+            //do sth. with 'file'
+            
+        })*/
+    })
+    }
     try {
         const newPost = await post.save();
         res.status(201).json(newPost)

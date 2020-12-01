@@ -1,0 +1,25 @@
+DB Models sind unter https://github.com/nusli/REST-API-Paderfinder/tree/master/models
+
+/staemme
+GET '/' --> json stamm[]
+GET '/:id' --> json stamm
+POST '/' --> json stamm, status 201
+    Parameter: erforderlich: name, email, passwort
+               optional: reg_datum, ansprechpartner, telefon, beschreibung, adresse, mitglieder
+PATCH '/id' --> json stamm
+    Parameter: alle optional, zu aktualisierender Wert des Stamms
+DELETE '/id' --> json: message="Stamm gelöscht"
+
+für  /posts /aktivitaeten /news sind die Routen die gleichen
+POST Parameter:
+/posts
+erforderlich: titel, änderungsDatum (wird noch geändert)
+optional: stamm_id, autor, inhalt, tags
+
+/aktivitaeten
+erforderlich: titel
+optional: datum, stamm_id, ort, beschreibung, regelmaessig, art, min_teilnehmerzahl, max_teilnehmerzahl
+
+/news
+erforderlich: titel, änderungsDatum
+optional: stamm_id, autor, inhalt, tags, autor_email

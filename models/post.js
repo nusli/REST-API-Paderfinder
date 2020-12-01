@@ -12,7 +12,7 @@ const postSchema = new mongoose.Schema({
         default: Date.now
     },
     stamm_id: String,
-    autor: String,
+    art: String,
     inhalt: String,
     tags: [String]
 })

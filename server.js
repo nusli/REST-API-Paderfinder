@@ -12,6 +12,7 @@ const Stamm = require('./models/stamm')
 
 // initialize passport
 // TODO
+/*
 const initializePassport = require('./passport-config')
 initializePassport(
     passport,
@@ -31,8 +32,8 @@ initializePassport(
         console.log('Konnte Stamm nicht finden', stammName);
         return null;
     }}
-)
-
+) 
+*/
 app.use(express.urlencoded({extended: false}))
 app.use(flash())
 app.use(session({
@@ -40,10 +41,19 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }))
+
+/*
 app.use(passport.initialize())
 app.use(passport.session())
-
+*/
 // current time in video: 12:58
+
+//Zum Fixen von lokalen CORS-Probleme -> später andere Lösung suchen
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  }); 
 
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
 const db = mongoose.connection

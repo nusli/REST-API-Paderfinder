@@ -14,11 +14,8 @@ function initialize(passport, getStammByName, getStammById) {
         console.log("passwort check")
         try {
             if (await bcrypt.compare(password, stamm.passwort)){
-                console.log("passt")
                 return done(null, stamm)
             } else {
-                console.log("passt nicht")
-
                 return done(null, false, {message: 'Falsches Passwort.'})
             }
         } catch (err) {

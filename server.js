@@ -51,8 +51,9 @@ app.use(passport.session())
 
 //Zum Fixen von lokalen CORS-Probleme -> später andere Lösung suchen
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Credentials', true);
     next();
   }); 
 
@@ -80,22 +81,35 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
   } 
-
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    failureFlash: true
-}),
+/*
+app.post('/login', checkNotAuthenticated, passport.authenticate('local'),
   function(req, res) {
     // If this function gets called, authentication was successful.
     // `req.user` contains the authenticated user.
     
-    console.log("login successful", req.user)
-    res.json({ message: "Login " + req.user})
+    req.login(req.user, (err) => {
+        console.log('Inside req.login() callback')
+        console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`)
+        console.log(`req.user: ${JSON.stringify(req.user)}`)
+      })
+    res.cookie("test", req.user.id).json({ message: "Login " + req.user})
   }) 
-/*
-app.post('/login', (req, res) => {
-    console.log("trying to login")
-    res.json({message: "logging in ..."})
-})  */
+  */
+
+ app.post('/login', (req, res, next) => {
+    console.log('Inside POST /login callback', req.isAuthenticated(), req.session)
+    passport.authenticate('local', (err, user, info) => {
+      console.log('Inside passport.authenticate() callback');
+      console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`)
+      console.log(`req.user: ${JSON.stringify(req.user)}`)
+      req.login(user, (err) => {
+        console.log('Inside req.login() callback')
+        console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`)
+        console.log(`req.user: ${JSON.stringify(req.user)}`)
+        return res.cookie("session_id", req.session.passport.user).send('You were authenticated & logged in!\n');
+      })
+    })(req, res, next);
+  }) 
 
 app.post('/register', async (req, res) => {
     console.log("Registrierungsanfrage")

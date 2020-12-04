@@ -54,6 +54,7 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
     next();
   }); 
 
@@ -81,21 +82,22 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
   } 
-/*
+
 app.post('/login', checkNotAuthenticated, passport.authenticate('local'),
   function(req, res) {
     // If this function gets called, authentication was successful.
     // `req.user` contains the authenticated user.
-    
+    /*
     req.login(req.user, (err) => {
         console.log('Inside req.login() callback')
         console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`)
         console.log(`req.user: ${JSON.stringify(req.user)}`)
-      })
-    res.cookie("test", req.user.id).json({ message: "Login " + req.user})
+      })*/
+    return res.cookie("session_id", req.session.passport.user).json({ message: 
+      `Session ${req.session.passport.user} established`})
   }) 
-  */
-
+  
+/*
  app.post('/login', (req, res, next) => {
     console.log('Inside POST /login callback', req.isAuthenticated(), req.session)
     passport.authenticate('local', (err, user, info) => {
@@ -110,7 +112,7 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local'),
       })
     })(req, res, next);
   }) 
-
+*/
 app.post('/register', async (req, res) => {
     console.log("Registrierungsanfrage")
     const createStamm = stammImport.createStamm;
@@ -118,7 +120,12 @@ app.post('/register', async (req, res) => {
     try {
         let newStamm = await createStamm(req);
         //res.status(201).json(newStamm);
-        res.redirect('http://localhost:4200/login');
+        req.login(newStamm, err => {
+          if (err) console.log("Error:", err);
+          console.log("session:", req.session)
+          return res.cookie("session_id", req.session.passport.user).json({ message: 
+            `Session ${req.session.passport.user} established`})
+        })
         
     } catch (err) {
         res.status(400 /* wrong user input */).json({message: err.message})
@@ -127,6 +134,11 @@ app.post('/register', async (req, res) => {
     
 
     
+})
+
+app.delete('/logout', (req, res) => {
+  req.logOut()
+  res.clearCookie("session_id").json({message: "Successfully logged out."});
 })
 
 app.listen(3000, () => console.log('Server has started'))

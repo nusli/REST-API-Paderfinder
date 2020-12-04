@@ -121,13 +121,14 @@ app.post('/register', async (req, res) => {
         let newStamm = await createStamm(req);
         //res.status(201).json(newStamm);
         req.login(newStamm, err => {
-          if (err) console.log("Error:", err);
+          if (err) return console.log("Error:", err);
           console.log("session:", req.session)
           return res.cookie("session_id", req.session.passport.user).json({ message: 
             `Session ${req.session.passport.user} established`})
         })
         
     } catch (err) {
+
         res.status(400 /* wrong user input */).json({message: err.message})
         return;
     }

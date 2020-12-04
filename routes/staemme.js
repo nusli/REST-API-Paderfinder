@@ -23,11 +23,9 @@ async function createStamm(req) {
     if (req.body.adresse != null) stamm.adresse = req.body.adresse
     if (req.body.mitglieder != null) stamm.mitglieder = req.body.mitglieder
 
-    console.log(stamm);
-
     const newStamm = await stamm.save();
-    console.log(newStamm)
     return newStamm;
+    
 }
 
 // Getting all

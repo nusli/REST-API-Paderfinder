@@ -1,6 +1,32 @@
 const express = require('express')
 const router = express.Router()
 const Stamm = require('../models/stamm')
+const bcrypt = require('bcrypt')
+
+async function createStamm(req) {
+    // TODO value checks
+    console.log("Stamm erstellen")
+    // required fields
+    const hashedpassword = await bcrypt.hash(req.body.passwort, 10)
+    const stamm = new Stamm({
+        name: req.body.name,
+        passwort: hashedpassword
+    })
+
+    // optional fields 
+    if (req.body.email != null && typeof req.body.email === 'string')
+        stamm.email = req.body.email;
+    stamm.reg_datum = new Date()
+    if (req.body.ansprechpartner != null) stamm.ansprechpartner = req.body.ansprechpartner
+    if (req.body.telefon != null) stamm.telefon = req.body.telefon
+    if (req.body.beschreibung != null) stamm.beschreibung = req.body.beschreibung
+    if (req.body.adresse != null) stamm.adresse = req.body.adresse
+    if (req.body.mitglieder != null) stamm.mitglieder = req.body.mitglieder
+
+    const newStamm = await stamm.save();
+    return newStamm;
+    
+}
 
 // Getting all
 router.get('/', async (req, res) => {
@@ -17,23 +43,8 @@ router.get('/:id', getStamm, (req, res) => {
 })
 // creating one
 router.post('/', async (req, res) => {
-    // required fields
-    const stamm = new Stamm({
-        name: req.body.name,
-        email: req.body.email,
-        passwort: req.body.passwort
-    })
-
-    // optional fields
-    if (req.body.reg_datum != null) stamm.reg_datum = req.body.reg_datum
-    if (req.body.ansprechpartner != null) stamm.ansprechpartner = req.body.ansprechpartner
-    if (req.body.telefon != null) stamm.telefon = req.body.telefon
-    if (req.body.beschreibung != null) stamm.beschreibung = req.body.beschreibung
-    if (req.body.adresse != null) stamm.adresse = req.body.adresse
-    if (req.body.mitglieder != null) stamm.mitglieder = req.body.mitglieder
-
     try {
-        const newStamm = await stamm.save();
+        let newStamm = await createStamm(req);
         res.status(201).json(newStamm)
     } catch (err) {
         res.status(400 /* wrong user input */).json({message: err.message})
@@ -86,8 +97,9 @@ router.delete('/:id', getStamm, async (req, res) => {
 async function getStamm(req, res, next) {
     try {
         var stamm = await Stamm.findById(req.params.id)
+        console.log(stamm)
         if (stamm == null){
-            return res.status(404).json({message: 'Cannot find subscriber'})
+            return res.status(404).json({message: 'Cannot find stamm'})
         }
     } catch (err) {
         return res.status(500).json( { message: err.message})
@@ -96,7 +108,8 @@ async function getStamm(req, res, next) {
     next()
 }
 
-module.exports = router;
+exports.router = router;
+exports.createStamm = createStamm;
 
 
 // TODO: github repo frontend + api

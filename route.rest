@@ -1,14 +1,14 @@
 GET http://localhost:3000/staemme
 
 ###
-GET http://localhost:3000/staemme/5fae8bd98aac4e40dca9fc0e
+GET http://localhost:3000/staemme/5fb033e0fb37b13860303c76
 
 ###
 POST http://localhost:3000/staemme
 Content-Type: application/json
 
 {
-    "name": "Stamm 3",
+    "name": "Stamm 4",
     "email": "stamm1@email.com",
     "passwort": "123"
 }
@@ -26,13 +26,14 @@ Content-Type: application/json
 ###
 GET http://localhost:3000/posts
 ###
-POST http://localhost:3000/news
+POST http://localhost:3000/posts
 Content-Type: application/json
 
 {
-    "titel": "News 1",
-    "min_teilnehmerzahl": 4,
-    "tags": ["Wasser", "Wald"]
+    "titel": "Post 4",
+    "stammid" : "5fc6045785e1b12f3ce8a4ca",
+    "art": "Lager",
+    "inhalt" : "Das ist ein Lager!"
 }
 ###
 DELETE http://localhost:3000/aktivitaeten/5fb0df68f0084610d433d233

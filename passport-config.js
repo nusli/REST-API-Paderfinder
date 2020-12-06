@@ -5,16 +5,18 @@ const bcrypt = require('bcrypt')
 
 function initialize(passport, getStammByName, getStammById) {
     async function authenticateUser(stammName, password, done) {
-        const stamm = getStammByName(stammName)
+        console.log("authenticating ...", stammName, password)
+        const stamm = await getStammByName(stammName)
         if (stamm == null) {
+            console.log('Kein Stamm mit diesem Namen')
             return done(null, false, {message: 'Kein Stamm mit diesem Namen'})
         }
-
+        console.log("passwort check")
         try {
             if (await bcrypt.compare(password, stamm.passwort)){
                 return done(null, stamm)
             } else {
-                return done(null, flase, {message: 'Falsches Passwort.'})
+                return done(null, false, {message: 'Falsches Passwort.'})
             }
         } catch (err) {
             

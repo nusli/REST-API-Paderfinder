@@ -18,9 +18,10 @@ router.get('/:id', getPost, (req, res) => {
 // creating one
 router.post('/', async (req, res) => {
     // required fields
+    if (req.body.titel == null) return res.status(400 /* wrong user input */).json({message: '"titel" is missing.'})
     const post = new Post({
         titel: req.body.titel,
-        änderungsDatum: req.body.änderungsDatum
+        änderungsDatum: new Date()
     })
 
     // optional fields

@@ -14,9 +14,9 @@ async function createStamm(req) {
     })
 
     // optional fields 
-    if (req.body.email != null) stamm.email = req.body.email
-    // Todo: get current date
-    if (req.body.reg_datum != null) stamm.reg_datum = new Date()
+    if (req.body.email != null && typeof req.body.email === 'string')
+        stamm.email = req.body.email;
+    stamm.reg_datum = new Date()
     if (req.body.ansprechpartner != null) stamm.ansprechpartner = req.body.ansprechpartner
     if (req.body.telefon != null) stamm.telefon = req.body.telefon
     if (req.body.beschreibung != null) stamm.beschreibung = req.body.beschreibung

@@ -44,9 +44,7 @@ router.patch('/:id', getPost, async (req, res) => {
     if (req.body.autor != null) {
         res.post.autor = req.body.autor
     }
-    if (req.body.änderungsDatum != null) {
-        res.post.änderungsDatum = req.body.änderungsDatum
-    }
+    res.post.änderungsDatum = new Date()
     if (req.body.stamm_id != null) {
         res.post.stamm_id = req.body.stamm_id
     }

@@ -1,16 +1,35 @@
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config
+}
+
 const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
 const Image = require('../models/image')
+var nodeUuid = require('node-uuid');
+const fs = require('fs');
 
 // got the code from here:
 // https://www.youtube.com/watch?v=EVIGIcm7o2w
 const mongoose = require('mongoose')
 var Schema = mongoose.Schema;
+var Gridfs = require('gridfs-stream');
 // establish mongodb connection
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
-var conn = mongoose.connection;
 var path = require('path');
+
+
+var mongoDriver = mongoose.mongo;
+var gfs;
+
+mongoose.connection.once('open', function () {
+    
+    gfs = Gridfs(mongoose.connection.db, mongoDriver);
+   
+    // all set!
+  })
+
+
 /* gridfs
 // require GridFS
 const Grid = require('gridfs-stream');
@@ -53,17 +72,24 @@ router.post('/', async (req, res) => {
     if (req.body.inhalt != null) post.inhalt = req.body.inhalt
     if (req.body.tags != null) post.tags = req.body.tags
     if (req.body.image != null) {
-        const image = new Image({
-            img: {
-                data: req.body.image,
-                contentType: 'image/' + req.body.fileEnding
-            }
-        })
+
+        var uuid = nodeUuid.v4();
+        post.image_id = uuid;
+
+        
         try {
-            const newImage = await image.save();
-            post.image_id = newImage._id;
+            console.log(req.body.image.name)
+            var writeStream = gfs.createWriteStream({
+                _id: uuid,
+                filename: req.body.image.name, // the name of the file
+                content_type: req.body.image.type, // somehow get mimetype from request,
+                mode: 'w' // ovewrite
+             });
+             
+             req.body.image.stream().pipeTo(writeStream);
+
         } catch (err) {
-            console.log("could not save image");
+            console.log("could not save image", err.message);
             res.status(400 /* wrong user input */).json({message: err.message});
             return;
         }
@@ -115,7 +141,11 @@ router.delete('/:id', getPost, async (req, res) => {
 
 async function getImage(image_id) {
     try {
-        var image = await Image.findById(image_id)
+        var image;
+        var readstream = gfs.createReadStream({
+            _id: '50e03d29edfdc00d34000001'
+        })
+        readstream.pipe(image);
     }
     catch (err) {
         console.log('couldnt retrieve image', image_id, err.message)

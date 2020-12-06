@@ -44,3 +44,6 @@ Content-Type: application/json
 {
     "autor": "Tronald Dump"
 }
+
+###
+GET http://localhost:3000/images

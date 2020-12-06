@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Post = require('../models/post')
+const Image = require('../models/image')
 
 // got the code from here:
 // https://www.youtube.com/watch?v=EVIGIcm7o2w
@@ -10,17 +11,24 @@ var Schema = mongoose.Schema;
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
 var conn = mongoose.connection;
 var path = require('path');
+/* gridfs
 // require GridFS
 const Grid = require('gridfs-stream');
 const fs=require('fs');
 
 // connect GridFS and Mongo
 Grid.mongo = mongoose.mongo
+*/
 
 // Getting all
 router.get('/', async (req, res) => {
     try{
         const posts = await Post.find();
+        for (p of posts) {
+            if (p.image_id != null) {
+                p.image = (await getImage(p.image_id)).img
+            } 
+        }
         res.json(posts);
     } catch (err){
         res.status(500).json({ message: err.message });
@@ -45,27 +53,23 @@ router.post('/', async (req, res) => {
     if (req.body.inhalt != null) post.inhalt = req.body.inhalt
     if (req.body.tags != null) post.tags = req.body.tags
     if (req.body.image != null) {
-        // TODO: how to check of connection is open?
-        conn.once('open', function () {
-        console.log('- Connection open -');
-        var gfs = Grid(conn.db);
-        // when connection is open, create write stream with
-        // the name to store file as in the DB
-        var writestream = gfs.createWriteStream({
-            // TODO: get file ending
-            filename: req.body.titel + "_image.jpg"
-        });
-        // TODO: does image need to be piped?
-        // create a read_stream for the image and pipe into db
-        fs.createReadStream(req.body.image).pipe(writestream);
+        const image = new Image({
+            img: {
+                data: req.body.image,
+                contentType: 'image/' + req.body.fileEnding
+            }
+        })
+        try {
+            const newImage = await image.save();
+            post.image_id = newImage._id;
+        } catch (err) {
+            console.log("could not save image");
+            res.status(400 /* wrong user input */).json({message: err.message});
+            return;
+        }
 
-        /*
-        writestream.on('close', function(file) {
-            //do sth. with 'file'
-            
-        })*/
-    })
     }
+    
     try {
         const newPost = await post.save();
         res.status(201).json(newPost)
@@ -109,11 +113,24 @@ router.delete('/:id', getPost, async (req, res) => {
     }
 })
 
+async function getImage(image_id) {
+    try {
+        var image = await Image.findById(image_id)
+    }
+    catch (err) {
+        console.log('couldnt retrieve image', image_id, err.message)
+    }
+    return image
+}
+
 async function getPost(req, res, next) {
     try {
         var post = await Post.findById(req.params.id)
         if (post == null){
             return res.status(404).json({message: 'Post konnte nicht gefunden werden.'})
+        }
+        if(post.image_id != null) {
+            post.image = (await getImage(post.image_id)).img
         }
     } catch (err) {
         return res.status(500).json( { message: err.message})

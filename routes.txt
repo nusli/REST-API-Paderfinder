@@ -22,4 +22,4 @@ optional: datum, stamm_id, ort, beschreibung, regelmaessig, art, min_teilnehmerz
 
 /news
 erforderlich: titel, änderungsDatum
-optional: stamm_id, autor, inhalt, tags, autor_email
+optional: stamm_id, autor, inhalt, tags, autor_email, image, fileEnding

@@ -80,6 +80,8 @@ const postRouter = require('./routes/posts')
 app.use('/posts', postRouter)
 const newsRouter = require('./routes/newsRouter')
 app.use('/news', newsRouter)
+const imageRouter = require('./routes/images')
+app.use('/images', imageRouter)
 
 // debug
 function checkNotAuthenticated(req, res, next) {

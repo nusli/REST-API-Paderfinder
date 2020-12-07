@@ -80,6 +80,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     // optional fields
     if (req.body.stamm_id != null) post.stamm_id = req.body.stamm_id
+    if (req.body.stamm_name != null) post.stamm_name = req.body.stamm_name
     if (req.body.autor != null) post.autor = req.body.autor
     if (req.body.art != null) post.art = [req.body.art]
     if (req.body.inhalt != null) post.inhalt = req.body.inhalt

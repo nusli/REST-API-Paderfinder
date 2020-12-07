@@ -11,6 +11,10 @@ const postSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
+     stamm_name: {
+        type: String,
+        required: true
+    },
     stamm_id: String,
     art: String,
     inhalt: String,

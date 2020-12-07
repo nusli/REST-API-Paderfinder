@@ -16,9 +16,11 @@ const connect = mongoose.createConnection(process.env.DATABASE_URL, { useNewUrlP
 var path = require('path');
 
 
-
 var mongoDriver = mongoose.mongo;
 var gfs;
+
+const fileUpload = require('express-fileupload');
+router.use(fileUpload());
 
 connect.once('open', () => {
     // initialize stream
@@ -45,9 +47,6 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 });
-
-
-
 
 
 // Getting all
@@ -106,7 +105,24 @@ router.get('/:metadata', (req, res, next) => {
         });
     });
 });
+router.post('/upload', function(req, res) {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
+    }
+  
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    let sampleFile = req.files.image;
+  
+    // Use the mv() method to place the file somewhere on your server
+    sampleFile.mv('../images/' + sampleFile.name, function(err) {
+      if (err)
+        return res.status(500).send(err);
+  
+      res.send('File uploaded!');
+    });
+  });  
 // creating one
+/*
 router.post('/', async (req, res) => {
     // required fields
     console.log(req.body)
@@ -121,9 +137,9 @@ router.post('/', async (req, res) => {
         const newImage = await image.save();
         res.status(201).json(newImage)
     } catch (err) {
-        res.status(400 /* wrong user input */).json({message: err.message})
+        res.status(400 /* wrong user input *//*).json({message: err.message})
     }
-})
+})*/
 
 // deleting one
 router.delete('/:id', getImage, async (req, res) => {

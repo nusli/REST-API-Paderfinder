@@ -8,9 +8,13 @@ const Post = require('../models/post')
 const Image = require('../models/image')
 var nodeUuid = require('node-uuid');
 const fs = require('fs');
+const path = require('path')
 
 const multer = require('multer');
 const GridFsStorage = require('multer-gridfs-storage');
+
+const fileUpload = require('express-fileupload');
+router.use(fileUpload());
 
 // got the code from here:
 // https://www.youtube.com/watch?v=EVIGIcm7o2w
@@ -19,40 +23,8 @@ var Schema = mongoose.Schema;
 var Gridfs = require('gridfs-stream');
 // establish mongodb connection
 //mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true})
-const connect = mongoose.createConnection(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true });
-var path = require('path');
+mongoose.createConnection(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 
-
-var mongoDriver = mongoose.mongo;
-var gfs;
-
-connect.once('open', () => {
-    // initialize stream
-    gfs = new mongoose.mongo.GridFSBucket(connect.db);
-});
-/*
-mongoose.connection.once('open', function () {
-    
-    gfs = Gridfs(mongoose.connection.db, mongoDriver);
-   
-    // all set!
-  })
-*/
-
-// create storage engine
-const storage = new GridFsStorage({
-    url: process.env.DATABASE_URL,
-    file: (req, file) => {
-        console.log(req.body)
-        console.log(file)
-        return {
-            filename: file.originalname,
-            metadata: req.body.titel
-        }
-    }
-});
-
-const upload = multer({ storage });
 
 // Getting all
 router.get('/', async (req, res) => {
@@ -69,7 +41,7 @@ router.get('/:id', getPost, (req, res) => {
     res.json(res.post)
 })
 // creating one
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/upload', async (req, res) => {
     //console.log("post request ", req.file, req.body)
     // required fields
     if (req.body.titel == null) return res.status(400 /* wrong user input */).json({message: '"titel" is missing.'})
@@ -84,32 +56,23 @@ router.post('/', upload.single('image'), async (req, res) => {
     if (req.body.autor != null) post.autor = req.body.autor
     if (req.body.art != null) post.art = req.body.art
     if (req.body.inhalt != null) post.inhalt = req.body.inhalt
-    if (req.file != null) {
-        console.log("file", req.file)
-        post.image_id = req.file.id;
+    if (req.files != null) {
+        
+        // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+        let upFile = req.files.image;
 
-        /*
-        try {
-            console.log(req.body.image.name)
-            var writeStream = gfs.createWriteStream({
-                _id: uuid,
-                filename: req.body.image.name, // the name of the file
-                content_type: req.body.image.type, // somehow get mimetype from request,
-                mode: 'w' // ovewrite
-             });
-             
-             req.body.image.stream().pipeTo(writeStream);
-
-        } catch (err) {
-            console.log("could not save image", err.message);
-            res.status(400 /* wrong user input *//*).json({message: err.message});
-            return;
-        }*/
-
+      
+        // Use the mv() method to place the file somewhere on your server
+        upFile.mv('images/' + req.body.titel + path.extname(upFile.name), function(err) {
+          if (err)
+            console.log("Couldn't save file", err)
+        });
+        post.image = post.titel + path.extname(upFile.name)
     }
-    
+        
     try {
         const newPost = await post.save();
+
         res.status(201).json(newPost)
     } catch (err) {
         res.status(400 /* wrong user input */).json({message: err.message})
@@ -153,20 +116,6 @@ router.delete('/:id', getPost, async (req, res) => {
 
 function getImage(image_id) {
     try {
-        /*
-        await gfs.find().toArray((err, files) => {
-            console.log("files", files)
-            if (!files[0] || files.length === 0) {
-                console.log(err)
-                console.log("no image found", image_id)
-                image= null;
-            }
-
-            let image = files[0];
-
-            return image
-
-        }); */
         console.log("find")
         return gfs.find().toArray();
     }
